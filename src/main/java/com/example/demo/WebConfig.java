@@ -4,13 +4,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DemoApplication {
+public class WebConfig {
 
 	public static void main(String[] args) {
 		Spring  
 		
 		
-		Application.run(DemoApplication.class, args);
+		Application.run(WebConfig.class, args);
 	}
 
 }
