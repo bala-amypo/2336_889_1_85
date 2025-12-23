@@ -1,27 +1,28 @@
-package com.example.demo.config;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+// package com.example.demo.config;
 
-import java.util.Arrays;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
+// import org.springframework.web.cors.CorsConfiguration;
+// import org.springframework.web.cors.CorsConfigurationSource;
+// import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@Configuration
-public class WebConfig {
+// import java.util.Arrays;
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+// @Configuration
+// public class WebConfig {
 
-        config.setAllowedOrigins(Arrays.asList("https://9315.pro604cr.amypo.ai/"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowCredentials(true);
+//     @Bean
+//     public CorsConfigurationSource corsConfigurationSource() {
+//         CorsConfiguration config = new CorsConfiguration();
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+//         config.setAllowedOrigins(Arrays.asList("https://9315.pro604cr.amypo.ai"));
+//         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//         config.setAllowedHeaders(Arrays.asList("*"));
+//         config.setAllowCredentials(true);
 
-        return source;
-    }
-}
+//         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//         source.registerCorsConfiguration("/**", config);
+
+//         return source;
+//     }
+// }
