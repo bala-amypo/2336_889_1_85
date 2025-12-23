@@ -31,8 +31,6 @@ public class FacilityScore {
     @Column(nullable = false)
     private Integer safetyScore;
 
-    public FacilityScore() {}
-
     public FacilityScore(Property property, Integer schoolProximity, Integer hospitalProximity, 
                         Integer transportAccess, Integer safetyScore) {
         this.property = property;
@@ -42,7 +40,7 @@ public class FacilityScore {
         this.safetyScore = safetyScore;
     }
 
-    // Getters and Setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -61,3 +59,4 @@ public class FacilityScore {
     public Integer getSafetyScore() { return safetyScore; }
     public void setSafetyScore(Integer safetyScore) { this.safetyScore = safetyScore; }
 }
+    public FacilityScore() {}
