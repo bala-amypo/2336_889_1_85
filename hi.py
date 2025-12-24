@@ -4,7 +4,7 @@ import os
 import shutil
 import time
 
-BASE_DIR = os.path.dirname(os.path.abspath(_file_))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SOURCE_DIR = os.path.join(BASE_DIR, "src", "test")
 DEST_DIR = "/home/coder/Workspace/test_saved"
 
