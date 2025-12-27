@@ -41,7 +41,8 @@ public class FacilityScore {
     }
 
     
-    public Long getId() { return id; }
+    public Long 
+    () { return id; }
     public void setId(Long id) { this.id = id; }
 
     public Property getProperty() { return property; }
