@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,74 +9,126 @@ import java.util.Set;
 @Entity
 @Table(name = "properties")
 public class Property {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
     private String city;
 
-    @Column(nullable = false)
     private Double price;
 
-    @Column(nullable = false)
     private Double areaSqFt;
 
-    @OneToOne(mappedBy = "property", cascade = CascadeType.ALL)
+    // ---------------- ONE TO ONE ----------------
+
+    @OneToOne(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private FacilityScore facilityScore;
+
+    @OneToOne(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private RatingResult ratingResult;
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RatingLog> ratingLogs;
+    // ---------------- ONE TO MANY ----------------
 
-    @ManyToMany
-    @JoinTable(
-        name = "user_property_assignments",
-        joinColumns = @JoinColumn(name = "property_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RatingLog> ratingLogs = new ArrayList<>();
+
+    // ---------------- MANY TO MANY ----------------
+
+    @ManyToMany(mappedBy = "assignedProperties")
     private Set<User> assignedUsers = new HashSet<>();
 
-    public Property() {}
+    // ---------------- HELPERS ----------------
 
-    public Property(String title, String address, String city, Double price, Double areaSqFt) {
+    public void addRatingLog(RatingLog log) {
+        ratingLogs.add(log);
+        log.setProperty(this);
+    }
+
+    // ---------------- GETTERS & SETTERS ----------------
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
         this.city = city;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Double getAreaSqFt() {
+        return areaSqFt;
+    }
+
+    public void setAreaSqFt(Double areaSqFt) {
         this.areaSqFt = areaSqFt;
     }
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public FacilityScore getFacilityScore() {
+        return facilityScore;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setFacilityScore(FacilityScore facilityScore) {
+        this.facilityScore = facilityScore;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public RatingResult getRatingResult() {
+        return ratingResult;
+    }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public void setRatingResult(RatingResult ratingResult) {
+        this.ratingResult = ratingResult;
+    }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public List<RatingLog> getRatingLogs() {
+        return ratingLogs;
+    }
 
-    public Double getAreaSqFt() { return areaSqFt; }
-    public void setAreaSqFt(Double areaSqFt) { this.areaSqFt = areaSqFt; }
+    public void setRatingLogs(List<RatingLog> ratingLogs) {
+        this.ratingLogs = ratingLogs;
+    }
 
-    public RatingResult getRatingResult() { return ratingResult; }
-    public void setRatingResult(RatingResult ratingResult) { this.ratingResult = ratingResult; }
+    // 🔥 THIS METHOD WAS MISSING (CAUSE OF YOUR ERROR)
+    public Set<User> getAssignedUsers() {
+        return assignedUsers;
+    }
 
-    public List<RatingLog> getRatingLogs() { return ratingLogs; }
-    public void setRatingLogs(List<RatingLog> ratingLogs) { this.ratingLogs = ratingLogs; }
-
-    public Set<User> getAssignedUsers() { return assignedUsers; }
-    public void setAssignedUsers(Set<User> assignedUsers) { this.assignedUsers = assignedUsers; }
+    public void setAssignedUsers(Set<User> assignedUsers) {
+        this.assignedUsers = assignedUsers;
+    }
 }
