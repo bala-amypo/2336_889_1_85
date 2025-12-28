@@ -1,65 +1,70 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.FacilityScore;
-import com.example.demo.entity.Property;
-import com.example.demo.entity.RatingResult;
-import com.example.demo.exception.BadRequestException;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.FacilityScoreRepository;
-import com.example.demo.repository.PropertyRepository;
-import com.example.demo.repository.RatingResultRepository;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.RatingService;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
 
 @Service
 public class RatingServiceImpl implements RatingService {
 
-    private final RatingResultRepository ratingResultRepository;
-    private final FacilityScoreRepository facilityScoreRepository;
-    private final PropertyRepository propertyRepository;
+    private final PropertyRepository propertyRepo;
+    private final FacilityScoreRepository scoreRepo;
+    private final RatingResultRepository ratingRepo;
+    private final RatingLogRepository logRepo;
 
-    public RatingServiceImpl(RatingResultRepository ratingResultRepository,
-                           FacilityScoreRepository facilityScoreRepository,
-                           PropertyRepository propertyRepository) {
-        this.ratingResultRepository = ratingResultRepository;
-        this.facilityScoreRepository = facilityScoreRepository;
-        this.propertyRepository = propertyRepository;
+    public RatingServiceImpl(PropertyRepository propertyRepo,
+                             FacilityScoreRepository scoreRepo,
+                             RatingResultRepository ratingRepo,
+                             RatingLogRepository logRepo) {
+        this.propertyRepo = propertyRepo;
+        this.scoreRepo = scoreRepo;
+        this.ratingRepo = ratingRepo;
+        this.logRepo = logRepo;
     }
 
     @Override
     public RatingResult generateRating(Long propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
 
-        FacilityScore facilityScore = facilityScoreRepository.findByProperty(property)
-                .orElseThrow(() -> new BadRequestException("Property must have facility scores before rating"));
+        Property property = propertyRepo.findById(propertyId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found"));
 
-        double finalRating = calculateFinalRating(facilityScore);
-        String ratingCategory = determineRatingCategory(finalRating);
+        FacilityScore fs = scoreRepo.findByProperty(property)
+                .orElseThrow(() -> new IllegalArgumentException("Facility score missing"));
 
-        RatingResult ratingResult = new RatingResult(property, finalRating, ratingCategory, LocalDateTime.now());
-        return ratingResultRepository.save(ratingResult);
+        double avg = (fs.getSchoolProximity()
+                    + fs.getHospitalProximity()
+                    + fs.getTransportAccess()
+                    + fs.getSafetyScore()) / 4.0;
+
+        RatingResult result = new RatingResult();
+        result.setProperty(property);
+        result.setFinalRating(avg);
+        result.setRatingCategory(resolveCategory(avg));
+
+        RatingResult saved = ratingRepo.save(result);
+
+        RatingLog log = new RatingLog();
+        log.setProperty(property);
+        log.setMessage("Rating generated: " + avg);
+        logRepo.save(log);
+
+        return saved;
     }
 
     @Override
     public RatingResult getRating(Long propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
 
-        return ratingResultRepository.findByProperty(property)
-                .orElseThrow(() -> new ResourceNotFoundException("Rating not found for property id: " + propertyId));
+        Property property = propertyRepo.findById(propertyId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found"));
+
+        return ratingRepo.findByProperty(property)
+                .orElseThrow(() -> new IllegalArgumentException("Rating not found"));
     }
 
-    private double calculateFinalRating(FacilityScore score) {
-        return (score.getSchoolProximity() + score.getHospitalProximity() + 
-                score.getTransportAccess() + score.getSafetyScore()) / 4.0;
-    }
-
-    private String determineRatingCategory(double rating) {
-        if (rating >= 8.0) return "EXCELLENT";
-        if (rating >= 6.0) return "GOOD";
-        if (rating >= 4.0) return "AVERAGE";
+    private String resolveCategory(double rating) {
+        if (rating >= 8) return "EXCELLENT";
+        if (rating >= 5) return "GOOD";
         return "POOR";
     }
 }
