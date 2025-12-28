@@ -2,8 +2,6 @@ package com.example.demo.service.impl;
 
 import com.example.demo.entity.FacilityScore;
 import com.example.demo.entity.Property;
-import com.example.demo.exception.BadRequestException;
-import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.FacilityScoreRepository;
 import com.example.demo.repository.PropertyRepository;
 import com.example.demo.service.FacilityScoreService;
@@ -12,50 +10,37 @@ import org.springframework.stereotype.Service;
 @Service
 public class FacilityScoreServiceImpl implements FacilityScoreService {
 
-    private final FacilityScoreRepository facilityScoreRepository;
-    private final PropertyRepository propertyRepository;
+    private final FacilityScoreRepository scoreRepo;
+    private final PropertyRepository propertyRepo;
 
-    public FacilityScoreServiceImpl(FacilityScoreRepository facilityScoreRepository, 
-                                   PropertyRepository propertyRepository) {
-        this.facilityScoreRepository = facilityScoreRepository;
-        this.propertyRepository = propertyRepository;
+    public FacilityScoreServiceImpl(FacilityScoreRepository scoreRepo,
+                                    PropertyRepository propertyRepo) {
+        this.scoreRepo = scoreRepo;
+        this.propertyRepo = propertyRepo;
     }
 
     @Override
-    public FacilityScore addScore(Long propertyId, FacilityScore score) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
+    public FacilityScore createScore(Long propertyId, FacilityScore score) {
 
-        if (facilityScoreRepository.findByProperty(property).isPresent()) {
-            throw new BadRequestException("Property already has a facility score");
+        Property property = propertyRepo.findById(propertyId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found"));
+
+        // ❌ Only one score allowed
+        if (scoreRepo.findByProperty(property).isPresent()) {
+            throw new IllegalArgumentException("Facility score already exists");
         }
 
-        validateScoreFields(score);
         score.setProperty(property);
-        return facilityScoreRepository.save(score);
+        return scoreRepo.save(score);
     }
 
     @Override
-    public FacilityScore getScoreByProperty(Long propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
+    public FacilityScore getScore(Long propertyId) {
 
-        return facilityScoreRepository.findByProperty(property)
-                .orElseThrow(() -> new ResourceNotFoundException("Facility score not found for property id: " + propertyId));
-    }
+        Property property = propertyRepo.findById(propertyId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found"));
 
-    private void validateScoreFields(FacilityScore score) {
-        if (score.getSchoolProximity() < 0 || score.getSchoolProximity() > 10) {
-            throw new BadRequestException("School proximity score must be between 0 and 10");
-        }
-        if (score.getHospitalProximity() < 0 || score.getHospitalProximity() > 10) {
-            throw new BadRequestException("Hospital proximity score must be between 0 and 10");
-        }
-        if (score.getTransportAccess() < 0 || score.getTransportAccess() > 10) {
-            throw new BadRequestException("Transport access score must be between 0 and 10");
-        }
-        if (score.getSafetyScore() < 0 || score.getSafetyScore() > 10) {
-            throw new BadRequestException("Safety score must be between 0 and 10");
-        }
+        return scoreRepo.findByProperty(property)
+                .orElseThrow(() -> new IllegalArgumentException("Score not found"));
     }
 }
