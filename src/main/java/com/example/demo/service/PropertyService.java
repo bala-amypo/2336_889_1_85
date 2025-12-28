@@ -1,10 +1,16 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Property;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PropertyService {
+
+    // REQUIRED BY TEST
     Property addProperty(Property property);
-    List<Property> getAllProperties();
-    Property findById(Long id);
+
+    // used by controller
+    Page<Property> listProperties(Pageable pageable, String city);
+
+    Property getProperty(Long id);
 }
